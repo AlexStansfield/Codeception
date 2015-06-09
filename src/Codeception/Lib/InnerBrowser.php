@@ -1211,4 +1211,30 @@ class InnerBrowser extends Module implements Web, PageSourceSaver
         return $requestParams;
     }
 
+    private function mergeUrls($baseUri, $uri)
+    {
+        $base = new Psr7Uri($baseUri);
+        $parts = parse_url($uri);
+        if ($parts === false) {
+            throw new TestRuntimeException("Invalid URI $uri");
+        }
+        if (isset($parts['path'])) {
+            $path = $parts['path'];
+            if ($base->getPath() && (strpos($path, '/') !== 0) && !empty($path)) {
+                // if it ends with a slash, relative paths are below it
+                if (preg_match('~/$~', $base->getPath())) {
+                    $path = $base->getPath() . $path;
+                } else {
+                    // remove double slashes
+                    $dir = rtrim(dirname($base->getPath()), '\\/');
+                    $path = $dir . '/' . $path;
+                }
+            }
+            $base = $base->withPath($path);
+        }
+        if (isset($parts['query'])) {
+            $base = $base->withQuery($parts['query']);
+        }
+        return $base;
+    }
 }

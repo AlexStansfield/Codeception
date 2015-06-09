@@ -3,6 +3,7 @@ namespace Codeception\Lib\Connector;
 
 use Codeception\Exception\ConnectionException;
 use Codeception\Util\Uri;
+use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -41,7 +42,7 @@ class Guzzle extends Client
         $this->refreshMaxInterval = $seconds;
     }
 
-    public function setClient(\GuzzleHttp\Client &$client)
+    public function setClient(GuzzleClient &$client)
     {
         $this->client = $client;
     }
@@ -113,7 +114,7 @@ class Guzzle extends Client
             $matches
         );
 
-        if (!$matchesMeta and isset($headers['Refresh'])) {
+        if (!$matchesMeta && isset($headers['Refresh'])) {
             // match by header
             preg_match(
                 '~(\d*);?url=(.*)~',
