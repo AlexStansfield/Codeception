@@ -1,6 +1,7 @@
 <?php
 namespace Codeception\Module;
 
+use GuzzleHttp\Psr7\Uri;
 use Codeception\Exception\ConnectionException;
 use Codeception\Exception\ElementNotFound;
 use Codeception\Exception\MalformedLocator;
@@ -400,7 +401,9 @@ class WebDriver extends \Codeception\Module implements WebInterface, RemoteInter
                 $build[$part] = $value;
             }
         }
-        $this->webDriver->get(\GuzzleHttp\Url::buildUrl($build));
+        
+        $uri = Uri::fromParts($build);
+        $this->webDriver->get((string) $uri);
     }
 
     public function see($text, $selector = null)

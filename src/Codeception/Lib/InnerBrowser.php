@@ -219,8 +219,11 @@ class InnerBrowser extends Module implements Web, PageSourceSaver
     public function _getCurrentUri()
     {
         $uri = new Psr7Uri($this->getRunningClient()->getHistory()->current()->getUri());
-        $query = $uri->getQuery() ? '?' . $uri->getQuery() : '';
-        return $uri->getPath() . $query;
+        $str = $uri->getPath();
+        if ($uri->getQuery()) {
+            $str .= '?' . $uri->getQuery();
+        }
+        return $str;
     }
 
     public function seeInCurrentUrl($uri)
@@ -488,32 +491,6 @@ class InnerBrowser extends Module implements Web, PageSourceSaver
         }
         $this->proceedSubmitForm($form, $params, $button);
     }
-
-    /**
-     * Merges the passed $add argument onto $base.
-     *
-     * If a relative URL is passed as the 'path' part of the $add url
-     * array, the relative URL is mapped using the base 'path' part as
-     * its base.
-     *
-     * @param array $base the base URL
-     * @param array $add the URL to merge
-     * @return array the merged array
-     */
-//    private function mergeUrls(array $base, array $add)
-//    {
-//        if (!empty($add['path']) && strpos($add['path'], '/') !== 0 && !empty($base['path'])) {
-//            // if it ends with a slash, relative paths are below it
-//            if (preg_match('~/$~', $base['path'])) {
-//                $add['path'] = $base['path'] . $add['path'];
-//            } else {
-//                // remove double slashes
-//                $dir = rtrim(dirname($base['path']), '\\/');
-//                $add['path'] = $dir . '/' . $add['path'];
-//            }
-//        }
-//        return array_merge($base, $add);
-//    }
 
     /**
      * Returns an absolute URL for the passed URI with the current URL
@@ -1239,6 +1216,16 @@ class InnerBrowser extends Module implements Web, PageSourceSaver
         return $requestParams;
     }
 
+    /**
+     * Merges the passed $uri argument onto $baseUri.
+     *
+     * If a relative URL is passed as the 'path' part of the $uri, the relative
+     * URL is mapped using the base 'path' part as its base.
+     *
+     * @param string $baseUri the base URL
+     * @param string $uri the URL to merge
+     * @return \GuzzleHttp\Psr7\Uri the merged uri
+     */
     private function mergeUrls($baseUri, $uri)
     {
         $base = new Psr7Uri($baseUri);
@@ -1265,5 +1252,4 @@ class InnerBrowser extends Module implements Web, PageSourceSaver
         }
         return $base;
     }
-
 }
