@@ -1,7 +1,6 @@
 <?php
 namespace Codeception\Module;
 
-use GuzzleHttp\Psr7\Uri;
 use Codeception\Exception\ConnectionException;
 use Codeception\Exception\ElementNotFound;
 use Codeception\Exception\MalformedLocatorException;

@@ -510,7 +510,7 @@ class InnerBrowser extends Module implements Web, PageSourceSaver
      * 
      * @param \Symfony\Component\DomCrawler\Crawler $form
      * @return string
-     * @throws \Codeception\Exception\TestRuntime if either the current
+     * @throws \Codeception\Exception\TestRuntimeException if either the current
      *         URL or the URI of the form's action can't be parsed
      */
     protected function getFormUrl(Crawler $form)
@@ -717,12 +717,12 @@ class InnerBrowser extends Module implements Web, PageSourceSaver
         $name = $field->attr('name');
 
         if ($field->getNode(0) === null) {
-            throw new TestRuntime("Form field $name is not located");
+            throw new TestRuntimeException("Form field $name is not located");
         }
         // If the name is an array than we compare objects to find right checkbox
         $formField = $this->matchFormField($name, $form, new ChoiceFormField($field->getNode(0)));
         if (!$formField instanceof ChoiceFormField) {
-            throw new TestRuntime("Form field $name is not a checkable");
+            throw new TestRuntimeException("Form field $name is not a checkable");
         }
         return $formField;
     }
@@ -1209,32 +1209,5 @@ class InnerBrowser extends Module implements Web, PageSourceSaver
             }
         }
         return $requestParams;
-    }
-
-    private function mergeUrls($baseUri, $uri)
-    {
-        $base = new Psr7Uri($baseUri);
-        $parts = parse_url($uri);
-        if ($parts === false) {
-            throw new TestRuntimeException("Invalid URI $uri");
-        }
-        if (isset($parts['path'])) {
-            $path = $parts['path'];
-            if ($base->getPath() && (strpos($path, '/') !== 0) && !empty($path)) {
-                // if it ends with a slash, relative paths are below it
-                if (preg_match('~/$~', $base->getPath())) {
-                    $path = $base->getPath() . $path;
-                } else {
-                    // remove double slashes
-                    $dir = rtrim(dirname($base->getPath()), '\\/');
-                    $path = $dir . '/' . $path;
-                }
-            }
-            $base = $base->withPath($path);
-        }
-        if (isset($parts['query'])) {
-            $base = $base->withQuery($parts['query']);
-        }
-        return $base;
     }
 }
