@@ -2,6 +2,7 @@
 namespace Codeception\Lib\Connector;
 
 use Codeception\Exception\ConnectionException;
+use Codeception\Util\Uri;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -146,12 +147,10 @@ class Guzzle extends Client
     {
         /** @var $baseUri Psr7Uri  **/
         $baseUri = $this->client->getConfig('base_uri');
-        $resolvedUri = Psr7Uri::resolve($baseUri, $uri);
-        if ((strpos($uri, '/') !== 0) and (strpos($uri, '://') === false)) {
-            $pathUri = (new Psr7Uri($uri))->getPath();
-            $resolvedUri = $resolvedUri->withPath(ltrim($baseUri->getPath(). $pathUri, '/'));
+        if (strpos($uri, '://') === false) {
+            return new Psr7Uri(Uri::appendPath((string)$baseUri, $uri));
         }
-        return $resolvedUri;
+        return Psr7Uri::resolve($baseUri, $uri);
     }
 
     protected function doRequest($request)

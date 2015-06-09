@@ -1127,28 +1127,28 @@ abstract class TestsForWeb extends \PHPUnit_Framework_TestCase
      */
     public function testWrongXpath()
     {
-        $this->setExpectedException('Codeception\Exception\MalformedLocator');
+        $this->setExpectedException('Codeception\Exception\MalformedLocatorException');
         $this->module->amOnPage('/');
         $this->module->seeElement('//aas[asd}[sd]a[/[');
     }
 
     public function testWrongCSS()
     {
-        $this->setExpectedException('Codeception\Exception\MalformedLocator');
+        $this->setExpectedException('Codeception\Exception\MalformedLocatorException');
         $this->module->amOnPage('/');
         $this->module->seeElement('.user#iasos<here');
     }
 
     public function testWrongStrictCSSLocator()
     {
-        $this->setExpectedException('Codeception\Exception\MalformedLocator');
+        $this->setExpectedException('Codeception\Exception\MalformedLocatorException');
         $this->module->amOnPage('/');
         $this->module->seeElement(['css' => 'hello<world']);
     }
 
     public function testWrongStrictXPathLocator()
     {
-        $this->setExpectedException('Codeception\Exception\MalformedLocator');
+        $this->setExpectedException('Codeception\Exception\MalformedLocatorException');
         $this->module->amOnPage('/');
         $this->module->seeElement(['xpath' => 'hello<wo>rld']);
     }
