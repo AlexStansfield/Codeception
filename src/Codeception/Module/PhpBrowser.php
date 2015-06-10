@@ -60,6 +60,7 @@ use GuzzleHttp\Client as GuzzleClient;
 class PhpBrowser extends InnerBrowser implements Remote, MultiSession
 {
 
+    private $isGuzzlePsr7;
     protected $requiredFields = ['url'];
 
     protected $config = [
@@ -99,8 +100,10 @@ class PhpBrowser extends InnerBrowser implements Remote, MultiSession
             throw new ModuleException($this, "Guzzle is not installed. Please install `guzzlehttp/guzzle` with composer");
         }
         if (class_exists('GuzzleHttp\Url')) {
+            $this->isGuzzlePsr7 = false;
             return new \Codeception\Lib\Connector\Guzzle();
         }
+        $this->isGuzzlePsr7 = true;
         return new \Codeception\Lib\Connector\Guzzle6();
     }
 
@@ -236,8 +239,15 @@ class PhpBrowser extends InnerBrowser implements Remote, MultiSession
                 $defaults['config']['curl'][constant($key)] = $val;
             }
         }
-        $defaults['base_uri'] = $this->config['url'];
-        $this->guzzle = new GuzzleClient($defaults);
+
+        if ($this->isGuzzlePsr7) {
+            $defaults['base_uri'] = $this->config['url'];
+            $this->guzzle = new GuzzleClient($defaults);
+        } else {
+            $this->guzzle = new GuzzleClient(['base_url' => $this->config['url'], 'defaults' => $defaults]);
+            $this->client->setBaseUri($this->config['url']);
+        }
+
         $this->client->setRefreshMaxInterval($this->config['refresh_max_interval']);
         $this->client->setClient($this->guzzle);
     }

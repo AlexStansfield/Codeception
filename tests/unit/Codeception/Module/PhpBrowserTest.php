@@ -13,6 +13,8 @@ class PhpBrowserTest extends TestsForBrowsers
 
     protected $history = [];
 
+    protected $guzzleVersion = 6;
+
     protected function setUp() {
         $this->module = new \Codeception\Module\PhpBrowser(make_container());
         $url = 'http://localhost:8000';
@@ -20,11 +22,19 @@ class PhpBrowserTest extends TestsForBrowsers
         $this->module->_initialize();
         $this->module->_cleanup();
         $this->module->_before($this->makeTest());
-        $this->module->guzzle->getConfig('handler')->push(\GuzzleHttp\Middleware::history($this->history));
+        if (class_exists('GuzzleHttp\Url')) {
+            $this->guzzleVersion = 5;            
+            $this->history = new \GuzzleHttp\Subscriber\History();
+            $this->module->guzzle->getEmitter()->attach($this->history);
+        } else {
+            $this->module->guzzle->getConfig('handler')->push(\GuzzleHttp\Middleware::history($this->history));
+        }
+
     }
 
     private function getLastRequest()
     {
+        $this->skipForOldGuzzle();
         return end($this->history)['request'];
     }
     
@@ -161,6 +171,7 @@ class PhpBrowserTest extends TestsForBrowsers
 
     public function testHeadersByConfig()
     {
+        $this->skipForOldGuzzle();
         $this->module->_setConfig(['headers' => ['xxx' => 'yyyy']]);
         $this->module->_initialize();
         $this->module->amOnPage('/form1');
@@ -169,6 +180,7 @@ class PhpBrowserTest extends TestsForBrowsers
 
     public function testHeadersBySetHeader()
     {
+
         $this->module->setHeader('xxx', 'yyyy');
         $this->module->amOnPage('/');
         $this->assertTrue($this->getLastRequest()->hasHeader('xxx'));
@@ -192,6 +204,7 @@ class PhpBrowserTest extends TestsForBrowsers
 
     public function testCurlOptions()
     {
+        $this->skipForOldGuzzle();
         $this->module->_setConfig(array('url' => 'http://google.com', 'curl' => array('CURLOPT_NOBODY' => true)));
         $this->module->_initialize();
         $config = $this->module->guzzle->getConfig('config');
@@ -284,5 +297,12 @@ class PhpBrowserTest extends TestsForBrowsers
         $data = data::get('form');
         $this->assertEquals('booze', $data['FooBar']['bar']);
         $this->assertEquals('crunked', $data['Food']['beer']['yum']['yeah']);
+    }
+
+    private function skipForOldGuzzle()
+    {
+        if (class_exists('GuzzleHttp\Url')) {
+            $this->markTestSkipped("Not for Guzzle >6");
+        }
     }
 }
