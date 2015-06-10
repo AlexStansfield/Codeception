@@ -13,8 +13,6 @@ class PhpBrowserTest extends TestsForBrowsers
 
     protected $history = [];
 
-    protected $guzzleVersion = 6;
-
     protected function setUp() {
         $this->module = new \Codeception\Module\PhpBrowser(make_container());
         $url = 'http://localhost:8000';
@@ -23,7 +21,6 @@ class PhpBrowserTest extends TestsForBrowsers
         $this->module->_cleanup();
         $this->module->_before($this->makeTest());
         if (class_exists('GuzzleHttp\Url')) {
-            $this->guzzleVersion = 5;            
             $this->history = new \GuzzleHttp\Subscriber\History();
             $this->module->guzzle->getEmitter()->attach($this->history);
         } else {
