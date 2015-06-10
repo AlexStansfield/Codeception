@@ -177,6 +177,8 @@ class Guzzle extends Client
             $options['form_params'] = $formData;
         }
 
+        codecept_debug($guzzleRequest);
+        codecept_debug((string)$this->client->getConfig('base_uri'));
         try {
             $response = $this->client->send($guzzleRequest, $options);
         } catch (ConnectException $e) {
