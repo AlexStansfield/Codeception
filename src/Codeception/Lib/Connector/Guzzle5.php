@@ -2,7 +2,7 @@
 
 namespace Codeception\Lib\Connector;
 
-use Codeception\Exception\TestRuntime as TestRuntimeException;
+use Codeception\Exception\TestRuntimeException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Message\Response;
 use GuzzleHttp\Post\PostFile;
