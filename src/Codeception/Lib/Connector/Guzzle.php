@@ -11,7 +11,7 @@ use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
 use GuzzleHttp\Url;
 use Symfony\Component\BrowserKit\Request as BrowserKitRequest;
 
-class Guzzle5 extends Client
+class Guzzle extends Client
 {
     protected $baseUri;
     protected $requestOptions = [

@@ -5,12 +5,14 @@ use Codeception\Exception\ConnectionException;
 use Codeception\Util\Uri;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use GuzzleHttp\Psr7\Response as Psr7Response;
 use GuzzleHttp\Psr7\Uri as Psr7Uri;
 use Symfony\Component\BrowserKit\Client;
+use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\BrowserKit\Request as BrowserKitRequest;
 use Symfony\Component\BrowserKit\Request;
 use Symfony\Component\BrowserKit\Response as BrowserKitResponse;
@@ -165,8 +167,7 @@ class Guzzle6 extends Client
         );
 
         $options = $this->requestOptions;
-        $options['cookies'] = new CookieJar(false, $this->getCookieJar()->all());
-
+        $options['cookies'] = $this->extractCookies();
         $multipartData = $this->extractMultipartFormData($request);
         if (!empty($multipartData)) {
             $options['multipart'] = $multipartData;
@@ -177,8 +178,6 @@ class Guzzle6 extends Client
             $options['form_params'] = $formData;
         }
 
-        codecept_debug($guzzleRequest);
-        codecept_debug((string)$this->client->getConfig('base_uri'));
         try {
             $response = $this->client->send($guzzleRequest, $options);
         } catch (ConnectException $e) {
@@ -298,5 +297,20 @@ class Guzzle6 extends Client
         }
 
         return $files;
+    }
+    
+    protected function extractCookies()
+    {
+        $jar = [];
+        $cookies = $this->getCookieJar()->all();
+        foreach ($cookies as $cookie) {
+            /** @var $cookie Cookie  **/
+            $setCookie = SetCookie::fromString((string)$cookie);
+            if (!$setCookie->getDomain()) {
+                $setCookie->setDomain('localhost');
+            }
+            $jar[] = $setCookie;
+        }
+        return new CookieJar(true, $jar);
     }
 }

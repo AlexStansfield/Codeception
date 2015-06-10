@@ -643,6 +643,14 @@ abstract class TestsForWeb extends \PHPUnit_Framework_TestCase
         $this->module->dontSeeCookie($cookie_name);
     }
 
+    public function testSendingCookies()
+    {
+        $this->module->setCookie('nocookie', '1111');
+        $this->module->amOnPage('/cookies');
+        $this->module->see('nocookie','pre');
+
+    }
+
     public function testPageTitle()
     {
         $this->module->amOnPage('/');
