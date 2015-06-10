@@ -2,16 +2,13 @@
 
 namespace Codeception\Module;
 
+use Codeception\Exception\ModuleException;
 use Codeception\Exception\TestRuntimeException;
-use Codeception\Lib\Connector\Guzzle;
-use Codeception\Lib\Connector\Guzzle as GuzzleConnector;
 use Codeception\Lib\InnerBrowser;
 use Codeception\Lib\Interfaces\MultiSession;
 use Codeception\Lib\Interfaces\Remote;
 use Codeception\TestCase;
-use GuzzleHttp\Client;
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Psr7\Uri;
 
 /**
  * Uses [Guzzle](http://guzzlephp.org/) to interact with your application over CURL.
@@ -81,7 +78,7 @@ class PhpBrowser extends InnerBrowser implements Remote, MultiSession
     protected $guzzleConfigFields = ['headers', 'auth', 'proxy', 'verify', 'cert', 'query', 'ssl_key', 'proxy', 'expect', 'version', 'cookies', 'timeout', 'connect_timeout'];
 
     /**
-     * @var GuzzleConnector
+     * @var \Codeception\Lib\Connector\Guzzle6
      */
     public $client;
 
@@ -92,8 +89,19 @@ class PhpBrowser extends InnerBrowser implements Remote, MultiSession
 
     public function _initialize()
     {
-        $this->client = new GuzzleConnector();
+        $this->client = $this->guessGuzzleConnector();
         $this->_initializeSession();
+    }
+
+    protected function guessGuzzleConnector()
+    {
+        if (!class_exists('GuzzleHttp\Client')) {
+            throw new ModuleException($this, "Guzzle is not installed. Please install `guzzlehttp/guzzle` with composer");
+        }
+        if (class_exists('GuzzleHttp\Url')) {
+            return new \Codeception\Lib\Connector\Guzzle5();
+        }
+        return new \Codeception\Lib\Connector\Guzzle6();
     }
 
     public function _before(TestCase $test)
